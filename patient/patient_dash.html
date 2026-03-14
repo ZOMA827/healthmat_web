@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Healthmate | Patient Dashboard</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link rel="stylesheet" href="../css/patient_dash.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+
+</head>
+<body>
+
+   <header class="patient-header" style="position: relative; display: flex; justify-content: space-between; align-items: center;">
+        
+        <div class="user-info">
+            <p id="greeting-text" data-i18n="dash_greeting">مرحباً بك،</p>
+            <h1 id="patient-name">جاري التحميل...</h1>
+        </div>
+
+        <div class="offline-badge" id="offline-indicator" style="display: none; position: absolute; left: 50%; transform: translateX(-50%); z-index: 10;" data-i18n="dash_offline">
+            <ion-icon name="cloud-offline-outline"></ion-icon> طوارئ (Offline)
+        </div>
+
+        <div class="header-actions" style="display: flex; align-items: center; gap: 15px;">
+            <div style="position: relative; cursor: pointer; display: flex;" onclick="openSPA('appointments-slide')">
+                <ion-icon name="calendar-number-outline" class="nav-icon" style="font-size: 28px; color: var(--text-main);"></ion-icon>
+                <span id="app-notif-dot" style="display:none; position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; background: var(--red); border-radius: 50%; border: 2px solid var(--bg-app);"></span>
+            </div>
+            <ion-icon name="options-outline" class="nav-icon" style="font-size: 28px; cursor: pointer; color: var(--text-main);" onclick="window.toggleSettings()"></ion-icon>
+        </div>
+
+    </header>
+
+   <main class="grid-container">
+        <div class="app-card c-meds" onclick="openSPA('meds-slide')">
+            <ion-icon name="notifications-outline"></ion-icon>
+            <span data-i18n="card_meds">تذكير الأدوية</span>
+        </div>
+
+        <div class="app-card c-id" onclick="openSPA('med-id-slide')">
+            <ion-icon name="id-card-outline"></ion-icon>
+            <span data-i18n="card_id">هويتي الطبية</span>
+        </div>
+        <div class="app-card c-radar online-only" onclick="openSPA('radar-slide')">
+            <ion-icon name="map"></ion-icon>
+            <span data-i18n="card_radar">رادار الصحة</span>
+        </div>
+
+      <div class="app-card c-blood online-only" onclick="openSPA('blood-slide')">
+            <ion-icon name="water"></ion-icon>
+            <span data-i18n="card_blood">نداء استغاثة (دم)</span>
+        </div>
+<div class="app-card c-folder online-only" onclick="openSPA('folder-slide')">
+            <ion-icon name="folder-open"></ion-icon>
+            <span data-i18n="card_folder">ملفي السحابي</span>
+        </div>
+
+        <div class="app-card c-pharmacy online-only" onclick="openSPA('pharmacy-slide')">
+            <ion-icon name="search-circle"></ion-icon>
+            <span data-i18n="card_pharmacy">طوارئ الصيدليات</span>
+        </div>
+        <div class="app-card c-firstaid" onclick="openSPA('firstaid-slide')">
+            <ion-icon name="medkit-outline"></ion-icon>
+            <span data-i18n="card_firstaid">الإسعافات الأولية</span>
+        </div>
+
+        <div class="app-card c-presc" onclick="openSPA('prescriptions-slide')">
+            <ion-icon name="document-text-outline"></ion-icon>
+            <span data-i18n="card_presc">وصفاتي الطبية</span>
+        </div>
+
+        <div class="app-card c-docs online-only" onclick="openSPA('find-docs-slide')">
+            <ion-icon name="search-circle-outline"></ion-icon>
+            <span data-i18n="card_docs">البحث عن طبيب</span>
+        </div>
+
+        <div class="app-card c-chat online-only" onclick="openSPA('chat-slide')">
+            <ion-icon name="chatbubbles-outline"></ion-icon>
+            <span data-i18n="card_chat">رسائلي</span>
+        </div>
+
+        <div class="app-card c-ai-scanner online-only" onclick="window.openGoogleScannerHub()">
+            <ion-icon name="scan-outline"></ion-icon>
+            <span data-i18n="card_ai">الماسح الذكي (AI)</span>
+        </div>
+
+    
+       <div class="app-card c-contacts" onclick="openSPA('contacts-slide')">
+            <ion-icon name="call" style="font-size: 45px;"></ion-icon>
+            <span data-i18n="card_contacts">أرقام الطوارئ</span>
+        </div>
+
+        <div class="app-card c-calc" onclick="openSPA('calc-slide')">
+            <ion-icon name="calculator-outline" style="font-size: 45px;"></ion-icon>
+            <span data-i18n="card_calc">حاسبة الصحة</span>
+        </div>
+
+        <div class="app-card c-water" onclick="openSPA('water-slide')">
+            <ion-icon name="water" style="font-size: 45px;"></ion-icon>
+            <span data-i18n="card_water">متعقب الماء</span>
+        </div>
+
+        <div class="app-card c-vitals" onclick="openSPA('vitals-slide')">
+            <ion-icon name="pulse" style="font-size: 45px;"></ion-icon>
+            <span data-i18n="card_vitals">سجل القياسات</span>
+        </div>
+
+
+    </main>
+   <div id="firstaid-slide" class="slide-page">
+        <div class="slide-header">
+            <ion-icon name="arrow-forward-outline" class="back-btn" onclick="closeSPA('firstaid-slide')"></ion-icon>
+            <h2 style="margin: 0; font-size: 18px;" data-i18n="fa_title">دليل الإسعافات الأولية 🚑</h2>
+        </div>
+        
+        <div style="padding: 20px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 80px;">
+            
+            <p style="color: var(--text-sub); font-size: 13px; text-align: center; margin-bottom: 20px;" data-i18n="fa_desc">هذا الدليل يعمل دائماً حتى بدون إنترنت لحالات الطوارئ.</p>
+            
+            <div class="fa-card" onclick="this.classList.toggle('active')">
+                <div class="fa-header" data-i18n="fa_burns">🔥 الحروق <ion-icon name="chevron-down-outline"></ion-icon></div>
+                <div class="fa-body" data-i18n="fa_burns_body">
+                    <br><br>
+                    1. أبعد المصاب عن مصدر الحرق فوراً.<br>
+                    2. ضع المنطقة المصابة تحت ماء جارٍ معتدل البرودة (ليس ثلجاً) لمدة 10-15 دقيقة.<br>
+                    3. <strong>تحذير:</strong> لا تضع معجون أسنان، زيوت، أو زبدة أبداً.<br>
+                    4. غطِّ الحرق بشاش معقم ونظيف فضفاض.
+                </div>
+            </div>
+
+            <div class="fa-card" onclick="this.classList.toggle('active')">
+                <div class="fa-header" data-i18n="fa_choking">🗣️ الاختناق (الغصة) <ion-icon name="chevron-down-outline"></ion-icon></div>
+                <div class="fa-body" data-i18n="fa_choking_body">
+                    
+<br><br>
+                    1. شجع المصاب على السعال بقوة.<br>
+                    2. إذا لم يستطع التنفس، قف خلفه واضربه 5 ضربات على الظهر بين لوحي الكتف.<br>
+                    3. قم بإجراء "مناورة هايمليخ": ضع قبضتك فوق سرة المصاب، وامسكها بيدك الأخرى، واجذب بقوة للداخل والأعلى 5 مرات.<br>
+                    4. اتصل بالإسعاف فوراً إذا فقد الوعي.
+                </div>
+            </div>
+
+            <div class="fa-card" onclick="this.classList.toggle('active')">
+                <div class="fa-header" data-i18n="fa_cpr">❤️ الإنعاش القلبي الرئوي (CPR) <ion-icon name="chevron-down-outline"></ion-icon></div>
+                <div class="fa-body" data-i18n="fa_cpr_body">
+                    <br><br>
+                    1. تأكد من أمان المكان ثم اتصل بالإسعاف.<br>
+                    2. ضع المصاب على ظهره على سطح صلب.<br>
+                    3. ضع باطن يدك في منتصف صدر المصاب، واليد الأخرى فوقها وشبك أصابعك.<br>
+                    4. اضغط بقوة وسرعة (حوالي 5 سم عمقاً بمعدل 100-120 ضغطة في الدقيقة).<br>
+                    5. لا تتوقف حتى تصل المساعدة أو يستيقظ المصاب.
+                </div>
+            </div>
+
+            <div class="fa-card" onclick="this.classList.toggle('active')">
+                <div class="fa-header" data-i18n="fa_bleeding">🩸 النزيف الشديد <ion-icon name="chevron-down-outline"></ion-icon></div>
+                <div class="fa-body" data-i18n="fa_bleeding_body">
+                    <br><br>
+                    1. اضغط بقوة ومباشرة على الجرح باستخدام شاش نظيف أو قطعة قماش.<br>
+                    2. حافظ على الضغط المستمر (لا ترفع القماش لترى إذا توقف الدم).<br>
+                    3. إذا امتلأ القماش بالدم، ضع قطعة أخرى فوقه ولا تزل الأولى.<br>
+                    4. ارفع العضو المصاب فوق مستوى القلب إذا أمكن (إذا لم يكن هناك كسر).
+                </div>
+            </div>
+
+            <div class="fa-card" onclick="this.classList.toggle('active')">
+                <div class="fa-header" data-i18n="fa_seizures">⚡ نوبات الصرع والتشنج <ion-icon name="chevron-down-outline"></ion-icon></div>
+                <div class="fa-body" data-i18n="fa_seizures_body">
+                    <br><br>
+                    1. <strong>لا تحاول</strong> تثبيت المصاب أو إيقاف حركته بالقوة.<br>
+                    2. أبعد الأشياء الصلبة أو الحادة من حوله لحمايته من الإصابة.<br>
+                    3. ضع شيئاً ناعماً (مثل سترة مطوية) تحت رأسه.<br>
+                    4. <strong>لا تضع أي شيء في فمه أبداً.</strong><br>
+                    5. بعد انتهاء النوبة، ضعه على جانبه (وضعية الإفاقة) لتسهيل التنفس.
+                </div>
+            </div>
+
+            <div class="fa-card" onclick="this.classList.toggle('active')">
+                <div class="fa-header" data-i18n="fa_poison">🤢 التسمم أو ابتلاع مواد خطرة <ion-icon name="chevron-down-outline"></ion-icon></div>
+                <div class="fa-body" data-i18n="fa_poison_body">
+                    1. اتصل بالإسعاف أو مركز السموم فوراً.<br>
+                    2. <strong>لا تجبر</strong> المصاب على التقيؤ أبداً (إلا إذا أمرك الطبيب بذلك).<br>
+                    3. إذا ابتلع مادة كيميائية حارقة، لا تعطه ماء أو حليباً قبل استشارة الطبيب.<br>
+                    4. احتفظ بعلبة المادة السامة لتريه للمسعفين.
+                </div>
+            </div>
+
+            <div class="fa-card" onclick="this.classList.toggle('active')">
+                <div class="fa-header" data-i18n="fa_bones">🦴 الكسور أو إصابات العظام <ion-icon name="chevron-down-outline"></ion-icon></div>
+                <div class="fa-body" data-i18n="fa_bones_body">
+                    <br><br>
+                    1. <strong>لا تحرك</strong> المصاب إذا شككت بوجود كسر في الرقبة أو العمود الفقري.<br>
+                    2. لا تحاول إعادة العظم المكسور إلى مكانه.<br>
+                    3. قم بتثبيت العضو المصاب باستخدام جبيرة مؤقتة (كرتون مقوى أو خشب موروب).<br>
+                    4. ضع كمادات ثلج (ملفوفة بقماش) لتخفيف التورم.
+                </div>
+            </div>
+
+        </div> </div>
+
+    <div id="prescriptions-slide" class="slide-page">
+        <div class="slide-header">
+            <ion-icon name="arrow-forward-outline" class="back-btn" onclick="closeSPA('prescriptions-slide')"></ion-icon>
+            <h2 style="margin: 0; font-size: 18px;" data-i18n="presc_title">وصفاتي المحفوظة 📄</h2>
+        </div>
+        <div style="padding: 20px;">
+            <p style="color: var(--text-sub); font-size: 13px; text-align: center; margin-bottom: 20px;" data-i18n="presc_desc">احفظ صور وصفاتك الطبية هنا لتريها للصيدلي بدون الحاجة لإنترنت.</p>
+            
+            <div class="upload-btn-wrapper">
+                <label for="presc-upload" class="upload-btn" data-i18n="presc_upload_btn">
+                    <ion-icon name="camera-outline"></ion-icon> تصوير / رفع وصفة
+                </label>
+                <input type="file" id="presc-upload" accept="image/*" hidden onchange="savePrescriptionLocal(event)">
+            </div>
+            
+            <div id="presc-gallery" class="presc-grid">
+                </div>
+        </div>
+    </div>
+
+    <div id="image-viewer">
+        <ion-icon name="close-circle" class="close-img" onclick="document.getElementById('image-viewer').style.display='none'"></ion-icon>
+        <img id="full-image" src="">
+    </div>
+
+  <div id="meds-slide" class="slide-page">
+        <div class="slide-header">
+            <ion-icon name="arrow-forward-outline" class="back-btn" onclick="closeSPA('meds-slide')"></ion-icon>
+            <h2 style="margin: 0; font-size: 18px;" data-i18n="meds_title">تذكير الأدوية 💊</h2>
+            <ion-icon name="add-circle" style="color: var(--green); font-size: 32px; margin-right: auto; cursor: pointer;" onclick="document.getElementById('add-med-form').classList.toggle('show')"></ion-icon>
+        </div>
+        
+        <div style="padding: 20px;">
+            <div id="add-med-form" class="med-form-card">
+                <h3 style="margin-top:0; color:var(--blue); font-size: 16px;" data-i18n="meds_add_new">إضافة دواء جديد</h3>
+                
+                <input type="text" id="med-name" placeholder="اسم الدواء (مثال: بنادول)" class="med-input" data-i18n-placeholder="meds_name_ph">
+                
+                <select id="med-meal" class="med-input" style="margin-top: 5px;">
+                    <option value="before" data-i18n="meds_meal_before">يُؤخذ قبل الأكل 🍽️</option>
+                    <option value="during" data-i18n="meds_meal_during">يُؤخذ وسط الأكل 🍛</option>
+                    <option value="after" data-i18n="meds_meal_after">يُؤخذ بعد الأكل ☕</option>
+                    <option value="any" data-i18n="meds_meal_any">بدون أكل / في أي وقت 💧</option>
+                </select>
+
+                <p style="font-size: 12px; color: var(--text-sub); margin: 10px 0 5px;" data-i18n="meds_choose_slots">اختر فترات الجرعة:</p>
+                <div style="display: flex; gap: 10px;">
+                    <button id="btn-morning" class="slot-btn" onclick="window.medEngine.toggleSlot('morning')" data-i18n="meds_slot_morning">صباحاً</button>
+                    <button id="btn-noon" class="slot-btn" onclick="window.medEngine.toggleSlot('noon')" data-i18n="meds_slot_noon">ظهراً</button>
+                    <button id="btn-evening" class="slot-btn" onclick="window.medEngine.toggleSlot('evening')" data-i18n="meds_slot_evening">مساءً</button>
+                </div>
+
+                <div id="row-morning" class="time-row" style="display: none; align-items: center; justify-content: space-between; margin-top: 10px;">
+                    <span style="font-size: 13px; color: #aaa;" data-i18n="meds_time_morning">وقت الصباح:</span>
+                    <input type="time" id="time-morning" class="med-input" style="width: 150px;">
+                </div>
+                <div id="row-noon" class="time-row" style="display: none; align-items: center; justify-content: space-between; margin-top: 10px;">
+                    <span style="font-size: 13px; color: #aaa;" data-i18n="meds_time_noon">وقت الظهر:</span>
+                    <input type="time" id="time-noon" class="med-input" style="width: 150px;">
+                </div>
+                <div id="row-evening" class="time-row" style="display: none; align-items: center; justify-content: space-between; margin-top: 10px;">
+                    <span style="font-size: 13px; color: #aaa;" data-i18n="meds_time_evening">وقت المساء:</span>
+                    <input type="time" id="time-evening" class="med-input" style="width: 150px;">
+                </div>
+                
+                <button class="save-med-btn" onclick="window.medEngine.saveMed()" data-i18n="meds_save_btn">حفظ التذكير ✔️</button>
+            </div>
+
+            <div id="meds-list" style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+                </div>
+        </div>
+    </div>
+    <div id="toast-msg"><ion-icon name="information-circle"></ion-icon> <span id="toast-text">رسالة</span></div>
+   <div id="med-id-slide" class="slide-page">
+        <div class="slide-header">
+            <ion-icon name="arrow-forward-outline" class="back-btn" onclick="closeSPA('med-id-slide')"></ion-icon>
+            <h2 style="margin: 0; font-size: 18px;" data-i18n="id_title">هويتي الطبية 🪪</h2>
+            <ion-icon name="create-outline" style="color: var(--orange); font-size: 28px; margin-right: auto; cursor: pointer;" onclick="window.medIdEngine.toggleEdit()"></ion-icon>
+        </div>
+        
+        <div style="padding: 20px;">
+            
+            <div class="medical-id-card">
+                <div class="id-header">
+                    <ion-icon name="medical"></ion-icon>
+                    <span data-i18n="id_emergency_card">بطاقة طوارئ طبية</span>
+                </div>
+                <div class="id-body">
+                    <div class="id-info">
+                        <h3 id="display-id-name" data-i18n="id_name_placeholder">الاسم غير مسجل</h3>
+                        <p><span data-i18n="id_blood">فصيلة الدم:</span> <strong id="display-id-blood" class="blood-type">--</strong></p>
+                        <p><span data-i18n="id_allergies">الحساسية:</span> <strong id="display-id-allergies">--</strong></p>
+                        <p><span data-i18n="id_chronic">أمراض مزمنة:</span> <strong id="display-id-chronic">--</strong></p>
+                        <p><span data-i18n="id_contact">رقم الطوارئ:</span> <strong id="display-id-contact" style="letter-spacing: 1px;">--</strong></p>
+                    </div>
+                    <div class="id-qr">
+                        <ion-icon name="qr-code-outline"></ion-icon>
+                    </div>
+                </div>
+            </div>
+
+            <div id="edit-id-form" class="med-form-card" style="display: none; border-color: var(--orange); margin-top: 20px;">
+                <h3 style="margin-top:0; color:var(--orange); font-size: 16px;" data-i18n="id_edit_title">تحديث البيانات الطبية</h3>
+                
+                <input type="text" id="input-id-name" class="med-input" placeholder="الاسم الكامل" data-i18n-placeholder="id_input_name">
+                
+                <select id="input-id-blood" class="med-input" style="margin-top: 10px;">
+                    <option value="" disabled selected data-i18n="id_select_blood">اختر فصيلة الدم 🩸</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="غير معروف" data-i18n="id_blood_unknown">لا أعرف</option>
+                </select>
+
+                <input type="text" id="input-id-allergies" class="med-input" style="margin-top: 10px;" placeholder="هل تعاني من حساسية لأدوية معينة؟" data-i18n-placeholder="id_input_allergies">
+                <input type="text" id="input-id-chronic" class="med-input" style="margin-top: 10px;" placeholder="أمراض مزمنة (سكري، ضغط، ربو..)؟" data-i18n-placeholder="id_input_chronic">
+                <input type="tel" id="input-id-contact" class="med-input" style="margin-top: 10px;" placeholder="رقم هاتف شخص للاتصال به للطوارئ" data-i18n-placeholder="id_input_contact">
+                
+                <button class="save-med-btn" style="background: var(--orange); color: white;" onclick="window.medIdEngine.saveData()" data-i18n="id_btn_save">حفظ الهوية الطبية ✔️</button>
+            </div>
+
+        </div>
+    </div>
+     <div id="settings-modal" class="glass-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); z-index: 100000; justify-content: center; align-items: center;" onclick="if(event.target === this) window.toggleSettings()">
+        
+        <div class="royal-modal" style="background: #111; border: 1px solid rgba(255,255,255,0.1); padding: 30px; border-radius: 25px; width: 85%; max-width: 350px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 data-i18n="settings_title" style="color: var(--blue); margin: 0; font-size: 20px;">الإعدادات ⚙️</h3>
+                <ion-icon name="close-circle" style="font-size: 28px; color: #555; cursor: pointer;" onclick="window.toggleSettings()"></ion-icon>
+            </div>
+            
+            <div class="settings-item" onclick="window.goOnlineMode()">
+                <ion-icon name="wifi" style="color: var(--green);"></ion-icon>
+                <span data-i18n="settings_online_mode">تفعيل وضع الأونلاين 🌐</span>
+            </div>
+
+            <div class="settings-item" onclick="window.toggleTheme()">
+                <ion-icon name="moon" style="color: var(--purple);"></ion-icon>
+                <span data-i18n="settings_theme">تغيير المظهر (مظلم/مضيء) 🌓</span>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 15px; padding: 15px; margin-bottom: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+        <ion-icon name="language" style="font-size: 24px; color: var(--orange);"></ion-icon>
+        <span data-i18n="settings_language" style="font-weight: bold; color: white;">لغة التطبيق</span>
+    </div>
+    <div style="display: flex; gap: 8px;">
+        <button class="lang-mini-btn" onclick="window.setAppLang('ar')" data-i18n="lang_ar_btn">عربي</button>
+        <button class="lang-mini-btn" onclick="window.setAppLang('en')"data-i18n="lang_en_btn">English</button>
+        <button class="lang-mini-btn" onclick="window.setAppLang('fr')" data-i18n="lang_fr_btn">Français</button>
+    </div>
+</div>
+
+            <div class="settings-item" style="border-color: rgba(255,0,0,0.3);" onclick="window.patientLogout()">
+                <ion-icon name="log-out" style="color: var(--red);"></ion-icon>
+                <span data-i18n="settings_logout" style="color: var(--red);">تسجيل الخروج</span>
+            </div>
+        </div>
+    </div>
+
+<div id="find-docs-slide" class="slide-page">
+    <div class="slide-header">
+        <ion-icon name="arrow-forward-outline" class="back-btn" onclick="closeSPA('find-docs-slide')"></ion-icon>
+        <h2 style="margin: 0; font-size: 18px;" data-i18n="find_docs_title">البحث عن أطباء 🔍</h2>
+    </div>
+    
+    <div style="padding: 20px;">
+        
+        <div class="search-container">
+            <ion-icon name="search" class="search-icon"></ion-icon>
+            <input type="text" id="doc-search-input" placeholder="ابحث عن اسم طبيب..." onkeyup="window.findDocsEngine.handleSearch()" data-i18n-placeholder="find_docs_ph">
+            <div id="search-autocomplete" class="autocomplete-box"></div>
+        </div>
+
+        <div class="specialty-scroll" id="specialty-filters">
+            <div class="spec-pill active" onclick="window.findDocsEngine.filterSpec('all', this)" data-i18n="spec_all">الكل 🌍</div>
+            <div class="spec-pill" onclick="window.findDocsEngine.filterSpec('أسنان', this)" data-i18n="spec_dental">أسنان 🦷</div>
+            <div class="spec-pill" onclick="window.findDocsEngine.filterSpec('قلب', this)" data-i18n="spec_heart">قلب ❤️</div>
+            <div class="spec-pill" onclick="window.findDocsEngine.filterSpec('عيون', this)" data-i18n="spec_eyes">عيون 👁️</div>
+            <div class="spec-pill" onclick="window.findDocsEngine.filterSpec('عظام', this)" data-i18n="spec_bones">عظام 🦴</div>
+            <div class="spec-pill" onclick="window.findDocsEngine.filterSpec('أطفال', this)" data-i18n="spec_kids">أطفال 👶</div>
+            <div class="spec-pill" onclick="window.findDocsEngine.filterSpec('نفسي', this)" data-i18n="spec_neuro">نفسي 🧠</div>
+        </div>
+
+        <div id="doctors-list" class="doctors-grid">
+            <div style="text-align:center; width:100%; color:#888; margin-top:30px;">
+                <ion-icon name="sync" style="font-size:40px; animation: spin 1s linear infinite; color:var(--blue);"></ion-icon>
+                <p data-i18n="find_docs_loading">جاري جلب قائمة الأطباء من السحابة...</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="doctor-profile-modal" class="glass-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 100000; justify-content: center; align-items: flex-end; padding-bottom: 0;">
+    
+    <div class="doc-profile-card" style="background: #111; border-top: 2px solid var(--blue); width: 100%; max-width: 500px; height: 85vh; border-radius: 35px 35px 0 0; display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">
+        
+        <div style="text-align: center; padding: 15px; cursor: pointer;" onclick="document.getElementById('doctor-profile-modal').style.display='none'">
+            <div style="width: 50px; height: 5px; background: #333; border-radius: 10px; margin: 0 auto;"></div>
+        </div>
+
+        <div style="padding: 0 25px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <div class="doc-avatar-large-wrap">
+                <img id="dp-img" src="../assets/img/profile.png" class="doc-avatar-large">
+                <div class="status-dot online"></div>
+            </div>
+            <h2 id="dp-name" style="margin: 10px 0 5px; color: white;">د. اسم الطبيب</h2>
+            <span id="dp-spec" class="spec-badge">تخصص الطبيب</span>
+            <p id="dp-bio" style="color: #aaa; font-size: 13px; line-height: 1.6; margin-top: 15px;">نبذة عن الطبيب تظهر هنا...</p>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="action-btn chat-btn" onclick="window.findDocsEngine.startChat()" data-i18n="btn_msg_doc">
+                    <ion-icon name="chatbubble-ellipses"></ion-icon> مراسلة
+                </button>
+               <button class="action-btn book-btn" onclick="window.findDocsEngine.openBookingModal()" data-i18n="btn_book_doc">
+                    <ion-icon name="calendar"></ion-icon> حجز موعد
+                </button>
+            </div>
+        </div>
+
+        <div style="flex: 1; overflow-y: auto; padding: 20px 25px;">
+            
+            <div id="patient-view-doc-info" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 15px; margin-bottom: 25px; text-align: right; display: none;">
+                <h4 style="color: var(--blue); margin-top: 0; margin-bottom: 15px; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;" data-i18n="clinic_info_title">
+                    معلومات العيادة 🏥
+                </h4>
+                
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; color:white; font-size: 13px;">
+                    <ion-icon name="call" style="color:var(--blue); font-size:18px;"></ion-icon> 
+                    <strong data-i18n="lbl_phone">الهاتف:</strong> <span id="v-doc-phone" dir="ltr" style="color: #aaa;">--</span>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; color:white; font-size: 13px;">
+                    <ion-icon name="time" style="color:var(--blue); font-size:18px;"></ion-icon> 
+                    <strong data-i18n="lbl_hours">ساعات العمل:</strong> <span id="v-doc-hours" style="color: #aaa;">--</span>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; color:white; font-size: 13px;">
+                    <ion-icon name="location" style="color:var(--blue); font-size:18px;"></ion-icon> 
+                    <strong data-i18n="lbl_location">العنوان:</strong> <span id="v-doc-location" style="color: #aaa;">--</span>
+                </div>
+
+                <button id="v-doc-map-btn" style="background: rgba(0, 210, 255, 0.1); color: var(--blue); border: 1px solid var(--blue); width: 100%; border-radius: 10px; padding: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: bold; cursor: pointer; font-family: 'Cairo';" data-i18n="btn_show_map">
+                    <ion-icon name="navigate" style="font-size: 18px;"></ion-icon> عرض الموقع على الخريطة
+                </button>
+            </div>
+            <h3 style="margin-top:0; color:var(--blue); font-size: 16px;" data-i18n="latest_posts_title">أحدث المنشورات 📝</h3>
+            <div id="dp-posts-list">
+                <p style="text-align: center; color: #666; font-size: 13px;" data-i18n="loading_posts">جاري جلب المنشورات...</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div id="booking-modal" class="glass-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 100001; justify-content: center; align-items: center;">
+        
+        <div class="royal-modal" style="background: #111; border: 1px solid rgba(0, 210, 255, 0.3); padding: 30px; border-radius: 25px; width: 85%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: scaleUp 0.3s ease;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: var(--blue); margin: 0; font-size: 18px;" data-i18n="booking_title">📅 طلب موعد جديد</h3>
+                <ion-icon name="close-circle" style="font-size: 28px; color: #555; cursor: pointer;" onclick="document.getElementById('booking-modal').style.display='none'"></ion-icon>
+            </div>
+            
+            <p style="color: white; margin-bottom: 15px; font-size: 14px;"><span data-i18n="booking_with">طلب حجز مع:</span> <strong id="book-doc-name" style="color: var(--orange);">--</strong></p>
+
+            <label style="color: #aaa; font-size: 13px;" data-i18n="booking_date">تاريخ الموعد:</label>
+            <input type="date" id="book-date" class="med-input" style="margin-bottom: 15px; cursor: pointer;">
+            
+            <label style="color: #aaa; font-size: 13px;" data-i18n="booking_time">الوقت المفضل:</label>
+            <input type="time" id="book-time" class="med-input" style="margin-bottom: 15px; cursor: pointer;">
+            
+            <label style="color: #aaa; font-size: 13px;" data-i18n="booking_notes">ملاحظات للطبيب (اختياري):</label>
+            <textarea id="book-notes" class="med-input" rows="3" placeholder="مثال: أعاني من ألم في المفاصل منذ أسبوع..." style="margin-bottom: 20px; resize: none;" data-i18n-placeholder="booking_notes_ph"></textarea>
+
+            <button id="submit-booking-btn" class="save-med-btn" style="background: var(--blue); color: black; width: 100%;" onclick="window.findDocsEngine.submitBooking()" data-i18n="booking_submit">تأكيد وإرسال الطلب ✔️</button>
+        </div>
+    </div>
+   <div id="appointments-slide" class="slide-page">
+        <div class="slide-header">
+            <ion-icon name="arrow-forward-outline" class="back-btn" onclick="closeSPA('appointments-slide')"></ion-icon>
+            <h2 style="margin: 0; font-size: 18px;" data-i18n="my_apps_title">مواعيدي المحجوزة 📅</h2>
+        </div>
+        
+        <div style="padding: 20px;">
+            <p style="color: var(--text-sub); font-size: 13px; text-align: center; margin-bottom: 20px;" data-i18n="my_apps_desc">هنا يمكنك متابعة حالة طلباتك (قبول، رفض، أو انتظار).</p>
+            
+            <div id="appointments-list" style="display: flex; flex-direction: column; gap: 15px;">
+                <div style="text-align:center; padding:40px; color:#666;">
+                    <ion-icon name="sync" style="font-size:40px; animation: spin 2s linear infinite;"></ion-icon>
+                </div>
+            </div>
+        </div>
+    </div>
+     <div id="ai-scanner-modal" class="glass-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100000; flex-direction: column; justify-content: center; align-items: center; overflow: hidden;">
+        
+        <ion-icon name="close-circle" style="position: absolute; top: 30px; right: 30px; font-size: 35px; color: rgba(255,255,255,0.5); cursor: pointer; z-index: 10;" onclick="window.aiScanner.closeScanner()"></ion-icon>
+
+        <h2 style="color: #00f3ff; font-weight: 300; letter-spacing: 2px; text-shadow: 0 0 15px rgba(0,243,255,0.5); margin-bottom: 20px;" data-i18n="ai_scanner_title">الذكاء الاصطناعي 🧠</h2>
+
+        <div class="scanner-frame">
+            <video id="camera-stream" autoplay playsinline></video>
+            
+            <div class="corner top-left"></div>
+            <div class="corner top-right"></div>
+            <div class="corner bottom-left"></div>
+            <div class="corner bottom-right"></div>
+            
+            <div class="ai-laser"></div>
+
+            <div id="ai-processing-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.85); backdrop-filter: blur(5px); flex-direction: column; justify-content: center; align-items: center; color: #00f3ff;">
+                <ion-icon name="scan-circle-outline" style="font-size: 60px; animation: pulseGlow 1s infinite alternate;"></ion-icon>
+                <p style="margin-top: 15px; font-family: monospace; font-size: 14px; animation: typeWriter 2s steps(20) infinite;" data-i18n="ai_analyzing">جاري تحليل المادة الفعالة...</p>
+            </div>
+        </div>
+
+       <p style="color: var(--text-sub); font-size: 13px; margin-top: 20px; text-align: center; max-width: 80%;" data-i18n="ai_scanner_desc">قم بتوجيه الكاميرا نحو علبة الدواء أو اختر صورة من هاتفك.</p>
+
+        <input type="file" id="ai-image-upload" accept="image/*" style="display: none;" onchange="window.aiScanner.handleImageUpload(event)">
+
+        <div style="display: flex; gap: 15px; margin-top: 20px; z-index: 10;">
+            <button id="capture-btn" class="cyber-btn" onclick="window.aiScanner.captureAndAnalyze()" data-i18n="ai_btn_scan">
+                <ion-icon name="aperture-outline"></ion-icon> مسح مباشر
+            </button>
+            
+            <button class="cyber-btn-outline" onclick="document.getElementById('ai-image-upload').click()" data-i18n="ai_btn_upload">
+                <ion-icon name="image-outline"></ion-icon> رفع صورة
+            </button>
+        </div>
+    </div>
+
+    <div id="ai-result-modal" class="glass-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); z-index: 100001; justify-content: center; align-items: center;">
+        <div style="background: linear-gradient(145deg, rgba(20,20,30,0.9), rgba(10,10,15,0.9)); border: 1px solid rgba(0, 243, 255, 0.3); border-radius: 25px; padding: 30px; width: 85%; max-width: 400px; box-shadow: 0 20px 50px rgba(0, 243, 255, 0.15); animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <ion-icon name="checkmark-done-circle" style="font-size: 60px; color: #00f3ff; text-shadow: 0 0 20px rgba(0,243,255,0.6);"></ion-icon>
+                <h3 id="ai-drug-name" style="color: white; margin: 10px 0 5px 0; font-size: 22px;">--</h3>
+                <span id="ai-drug-type" style="background: rgba(0, 243, 255, 0.1); color: #00f3ff; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid rgba(0, 243, 255, 0.3);">--</span>
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.4); border-radius: 15px; padding: 15px; margin-bottom: 20px;">
+                <p style="margin: 0 0 10px 0; color: #ccc; font-size: 14px;"><strong style="color:#fff;" data-i18n="ai_uses">دواعي الاستعمال:</strong> <span id="ai-drug-uses">--</span></p>
+                <p style="margin: 0 0 10px 0; color: #ccc; font-size: 14px;"><strong style="color:#fff;" data-i18n="ai_dosage">الجرعة المعتادة:</strong> <span id="ai-drug-dosage">--</span></p>
+                <p style="margin: 0; color: #ff4b2b; font-size: 13px;"><strong data-i18n="ai_warnings">⚠️ تحذير:</strong> <span id="ai-drug-warnings">--</span></p>
+            </div>
+
+            <button onclick="document.getElementById('ai-result-modal').style.display='none'" style="width: 100%; padding: 15px; border-radius: 15px; background: #00f3ff; color: #000; font-weight: bold; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);" data-i18n="btn_close">فهمت ذلك، شكراً</button>
+        </div>
+    </div>
+
+
+
+
+    
+    <div id="media-viewer-modal" class="glass-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); z-index: 9999999; justify-content: center; align-items: center; flex-direction: column;">
+    
+    <ion-icon name="close-circle" style="position: absolute; top: 30px; right: 30px; font-size: 45px; color: rgba(255,255,255,0.7); cursor: pointer; z-index: 10; transition: 0.3s;" onclick="window.closeMediaViewer()" onmouseover="this.style.color='#ff4b2b'" onmouseout="this.style.color='rgba(255,255,255,0.7)'"></ion-icon>
+    
+    <img id="viewer-img" src="" style="display: none; max-width: 95%; max-height: 85%; border-radius: 15px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); object-fit: contain; animation: scaleUp 0.3s ease-out;">
+    
+    <video id="viewer-video" controls style="display: none; max-width: 95%; max-height: 85%; border-radius: 15px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); object-fit: contain; outline: none; animation: scaleUp 0.3s ease-out;"></video>
+</div>
+
+<div id="contacts-slide" class="slide-page">
+        <div class="slide-header">
+            <ion-icon name="arrow-forward-outline" class="back-btn" onclick="closeSPA('contacts-slide')"></ion-icon>
+            <h2 style="margin: 0; font-size: 18px;" data-i18n="contacts_title">أرقام الطوارئ 🚨</h2>
+        </div>
+        <div style="padding: 20px;">
+            <div class="hm-list-item" style="border-left: 4px solid var(--red);">
+                <div><h4 style="margin:0;" data-i18n="contact_ambulance">الإسعاف</h4><p style="margin:0; font-size:12px; color:var(--text-sub);" data-i18n="contact_med_emerg">طوارئ طبية</p></div>
+                <a href="tel:14" class="hm-btn" style="width:auto; padding:8px 15px; background:var(--red); color:white; text-decoration:none;"><ion-icon name="call"></ion-icon> <span data-i18n="btn_call">اتصال</span></a>
+            </div>
+            <div class="hm-list-item" style="border-left: 4px solid var(--blue);">
+                <div><h4 style="margin:0;" data-i18n="contact_police">الشرطة</h4><p style="margin:0; font-size:12px; color:var(--text-sub);" data-i18n="contact_security">تدخل أمني</p></div>
+                <a href="tel:17" class="hm-btn" style="width:auto; padding:8px 15px; background:var(--blue); color:white; text-decoration:none;"><ion-icon name="call"></ion-icon> <span data-i18n="btn_call">اتصال</span></a>
+            </div>
+            <div class="hm-list-item" style="border-left: 4px solid var(--orange);">
+                <div><h4 style="margin:0;" data-i18n="contact_civil">الحماية المدنية</h4><p style="margin:0; font-size:12px; color:var(--text-sub);" data-i18n="contact_fire">حوادث وحرائق</p></div>
+                <a href="tel:14" class="hm-btn" style="width:auto; padding:8px 15px; background:var(--orange); color:white; text-decoration:none;"><ion-icon name="call"></ion-icon> <span data-i18n="btn_call">اتصال</span></a>
+            </div>
+            
+            <h3 style="margin-top:20px; font-size:16px;" data-i18n="my_custom_contacts">أرقامي الخاصة:</h3>
+            <input type="text" id="contact-name" class="hm-input" placeholder="الاسم (مثال: دكتور أحمد)" data-i18n-placeholder="contact_name_ph">
+            <input type="tel" id="contact-phone" class="hm-input" placeholder="رقم الهاتف" data-i18n-placeholder="contact_phone_ph">
+            <button class="hm-btn" onclick="window.offlineEngine.saveContact()" data-i18n="btn_add_contact">إضافة للسرعة ➕</button>
+            <div id="custom-contacts-list" style="margin-top:15px;"></div>
+        </div>
+    </div>
+
+    <div id="calc-slide" class="slide-page">
+        <div class="slide-header">
+            <ion-icon name="arrow-forward-outline" class="back-btn" onclick="closeSPA('calc-slide')"></ion-icon>
+            <h2 style="margin: 0; font-size: 18px;" data-i18n="calc_title">حاسبة الصحة 🧮</h2>
+        </div>
+        <div style="padding: 20px;">
+            <div class="hm-list-item" style="flex-direction:column; align-items:stretch;">
+                <h4 style="margin:0 0 10px 0; color:var(--blue);" data-i18n="calc_bmi">مؤشر كتلة الجسم (BMI)</h4>
+                <input type="number" id="bmi-weight" class="hm-input" placeholder="الوزن بالكيلوجرام (مثال: 75)" data-i18n-placeholder="calc_weight_ph">
+                <input type="number" id="bmi-height" class="hm-input" placeholder="الطول بالسنتيمتر (مثال: 175)" data-i18n-placeholder="calc_height_ph">
+                <button class="hm-btn" onclick="window.offlineEngine.calculateBMI()" data-i18n="btn_calculate">احسب النتيجة</button>
+                <div id="bmi-result" style="margin-top:10px; font-weight:bold; text-align:center;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="water-slide" class="slide-page">
+        <div class="slide-header">
+            <ion-icon name="arrow-forward-outline" class="back-btn" onclick="closeSPA('water-slide')"></ion-icon>
+            <h2 style="margin: 0; font-size: 18px;" data-i18n="water_title">متعقب شرب الماء 💧</h2>
+        </div>
+        <div style="padding: 20px; text-align:center;">
+            <p style="color:var(--text-sub);" data-i18n="water_goal">الهدف اليومي: 8 أكواب (2 لتر)</p>
+            <div class="water-circle" onclick="window.offlineEngine.drinkWater()">
+                <div class="water-fill" id="water-fill-level" style="height:0%;"></div>
+                <div class="water-text"><span id="water-count">0</span>/8</div>
+            </div>
+            <button class="hm-btn" style="background:var(--card-bg); color:var(--text-main);" onclick="window.offlineEngine.resetWater()" data-i18n="water_reset">تصفير العداد 🔄</button>
+        </div>
+    </div>
+
+    <div id="vitals-slide" class="slide-page">
+        <div class="slide-header">
+            <ion-icon name="arrow-forward-outline" class="back-btn" onclick="closeSPA('vitals-slide')"></ion-icon>
+            <h2 style="margin: 0; font-size: 18px;" data-i18n="vitals_title">سجل القياسات 📈</h2>
+        </div>
+        <div style="padding: 20px;">
+            <select id="vital-type" class="hm-input">
+                <option value="sugar" data-i18n="vital_sugar">مستوى السكر في الدم</option>
+                <option value="pressure" data-i18n="vital_pressure">ضغط الدم</option>
+                <option value="heart" data-i18n="vital_heart">نبضات القلب</option>
+            </select>
+            <input type="text" id="vital-value" class="hm-input" placeholder="القيمة (مثال: 120 أو 120/80)" data-i18n-placeholder="vital_value_ph">
+            <button class="hm-btn" style="background:var(--orange);" onclick="window.offlineEngine.saveVital()" data-i18n="btn_save_vital">تسجيل القياس 💾</button>
+            
+            <h3 style="margin-top:20px; font-size:16px;" data-i18n="prev_vitals">قراءاتي السابقة:</h3>
+            <div id="vitals-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
+    </div>
+    <div id="radar-slide" class="slide-page">
+        <div class="slide-header">
+            <ion-icon name="arrow-forward-outline" class="back-btn" onclick="closeSPA('radar-slide')"></ion-icon>
+            <h2 style="margin: 0; font-size: 18px;" data-i18n="radar_slide_title">الرادار الصحي 📍</h2>
+        </div>
+        
+        <div id="health-map" style="flex: 1; width: 100%; z-index: 1;"></div>
+        
+        <button onclick="window.radarEngine.locateMe()" style="position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 1000; background: var(--blue); color: #000; border: none; padding: 15px 25px; border-radius: 30px; font-family: 'Cairo'; font-weight: bold; box-shadow: 0 10px 20px rgba(0,210,255,0.4); display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <ion-icon name="locate" style="font-size: 20px;"></ion-icon> <span data-i18n="btn_locate_me">حدد موقعي الآن</span>
+        </button>
+    </div>
+    <div id="blood-slide" class="slide-page">
+        <div class="slide-header">
+            <ion-icon name="arrow-forward-outline" class="back-btn" onclick="closeSPA('blood-slide')"></ion-icon>
+            <h2 style="margin: 0; font-size: 18px; color: var(--red);" data-i18n="blood_slide_title">شبكة إنقاذ الحياة 🩸</h2>
+        </div>
+        
+        <div style="padding: 20px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+            
+            <button class="hm-btn" style="background: var(--red); color: white; margin-bottom: 20px; box-shadow: 0 0 15px rgba(255,75,43,0.6);" onclick="document.getElementById('blood-form').style.display='block'">
+                <ion-icon name="megaphone-outline"></ion-icon> <span data-i18n="btn_emergency_call">إطلاق نداء استغاثة عاجل</span>
+            </button>
+
+            <div id="blood-form" class="med-form-card" style="border-color: var(--red); display: none;">
+                <h3 style="color: var(--red); margin-top: 0; font-size:16px;" data-i18n="blood_form_title">تفاصيل النداء العاجل:</h3>
+                
+                <select id="blood-type-req" class="hm-input">
+                    <option value="" disabled selected data-i18n="blood_type_placeholder">اختر الزمرة المطلوبة 🩸</option>
+                    <option value="O-" data-i18n="blood_o_neg">O- (سالب - نادر جداً)</option>
+                    <option value="O+" data-i18n="blood_o_pos">O+ (موجب)</option>
+                    <option value="A-" data-i18n="blood_a_neg">A- (سالب)</option>
+                    <option value="A+" data-i18n="blood_a_pos">A+ (موجب)</option>
+                    <option value="B-" data-i18n="blood_b_neg">B- (سالب)</option>
+                    <option value="B+" data-i18n="blood_b_pos">B+ (موجب)</option>
+                    <option value="AB-" data-i18n="blood_ab_neg">AB- (سالب - أندر زمرة)</option>
+                    <option value="AB+" data-i18n="blood_ab_pos">AB+ (موجب)</option>
+                </select>
+
+                <input type="text" id="blood-wilaya" class="hm-input" placeholder="الولاية (مثال: الجزائر، سطيف...)" data-i18n-placeholder="blood_wilaya_ph">
+                <input type="text" id="blood-hospital" class="hm-input" placeholder="اسم المستشفى (مثال: مستشفى مصطفى باشا)" data-i18n-placeholder="blood_hospital_ph">
+                <input type="tel" id="blood-phone" class="hm-input" placeholder="رقم هاتف المرافق للاتصال به" data-i18n-placeholder="blood_phone_ph">
+                
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="hm-btn" style="background: var(--red); color: white; flex: 1; margin:0;" onclick="window.bloodEngine.submitRequest()" data-i18n="btn_save_life">أنقذ حياة 🚀</button>
+                    <button class="hm-btn" style="background: transparent; border: 1px solid var(--text-sub); color: var(--text-sub); flex: 1; margin:0;" onclick="document.getElementById('blood-form').style.display='none'" data-i18n="btn_cancel">إلغاء</button>
+                </div>
+            </div>
+
+            <h3 style="font-size: 15px; margin-top: 10px; color: var(--text-sub);" data-i18n="urgent_cases_title">حالات عاجلة تنتظر تبرعك:</h3>
+            <div id="blood-requests-list" style="display: flex; flex-direction: column; gap: 15px; padding-bottom: 50px;">
+                </div>
+            
+        </div>
+    </div>
+    <div id="folder-slide" class="slide-page">
+        <div class="slide-header">
+            <ion-icon name="arrow-forward-outline" class="back-btn" onclick="closeSPA('folder-slide')"></ion-icon>
+            <h2 style="margin: 0; font-size: 18px; color: var(--gold);" data-i18n="folder_slide_title">ملفي السحابي 📁</h2>
+        </div>
+        
+        <div style="padding: 20px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+            <p style="color: var(--text-sub); font-size: 13px; text-align: center; margin-bottom: 20px;" data-i18n="folder_desc">احتفظ بصور التحاليل والأشعة هنا للرجوع إليها أو مشاركتها مع طبيبك في أي وقت.</p>
+            
+           <div id="cloud-upload-buttons" style="display: flex; gap: 10px; margin-bottom: 20px;">
+    <label for="cloud-upload-analysis" class="hm-btn" style="flex: 1; text-align: center; background: var(--blue); color: black; display: flex; flex-direction: column; align-items: center; padding: 15px; cursor: pointer; margin: 0;">
+        <ion-icon name="flask-outline" style="font-size: 24px; margin-bottom: 5px;"></ion-icon>
+        <span data-i18n="btn_upload_analysis">رفع تحليل</span>
+    </label>
+    <input type="file" id="cloud-upload-analysis" accept="image/*" hidden onchange="window.cloudFolderEngine.uploadFile(event, 'تحليل مخبري')">
+
+    <label for="cloud-upload-scan" class="hm-btn" style="flex: 1; text-align: center; background: var(--orange); color: black; display: flex; flex-direction: column; align-items: center; padding: 15px; cursor: pointer; margin: 0;">
+        <ion-icon name="body-outline" style="font-size: 24px; margin-bottom: 5px;"></ion-icon>
+        <span data-i18n="btn_upload_scan">رفع أشعة</span>
+    </label>
+    <input type="file" id="cloud-upload-scan" accept="image/*" hidden onchange="window.cloudFolderEngine.uploadFile(event, 'أشعة (راديو)')">
+</div>
+            <h3 style="font-size: 15px; color: var(--text-main); margin-bottom: 10px;" data-i18n="saved_files_title">ملفاتي المحفوظة:</h3>
+            <div id="cloud-files-list" style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 50px;">
+                </div>
+        </div>
+    </div>
+    <div id="pharmacy-slide" class="slide-page">
+        <div class="slide-header">
+            <ion-icon name="arrow-forward-outline" class="back-btn" onclick="closeSPA('pharmacy-slide')"></ion-icon>
+            <h2 style="margin: 0; font-size: 18px; color: var(--purple);" data-i18n="pharmacy_slide_title">طوارئ الصيدليات 🌙</h2>
+        </div>
+        
+        <div style="padding: 20px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 15px; border: 1px solid var(--border-color);">
+                <button id="tab-btn-med" class="hm-btn" style="margin:0; flex:1; background:var(--purple); color:white; border-radius:10px;" onclick="window.pharmacyEngine.switchTab('med')" data-i18n="tab_med_hunter">صائد الأدوية 📡</button>
+                <button id="tab-btn-duty" class="hm-btn" style="margin:0; flex:1; background:transparent; color:var(--text-sub); border-radius:10px; border:none;" onclick="window.pharmacyEngine.switchTab('duty')" data-i18n="tab_night_duty">المناوبات 🌙</button>
+            </div>
+
+            <div id="section-med-hunter">
+                <div style="background: rgba(183, 148, 244, 0.1); border: 1px solid var(--purple); padding: 15px; border-radius: 15px; text-align: center; margin-bottom: 20px;">
+                    <ion-icon name="radio-outline" style="font-size: 40px; color: var(--purple); animation: spin 3s linear infinite;"></ion-icon>
+                    <p style="font-size: 13px; color: #ccc; margin-top: 10px;" data-i18n="med_hunter_desc">أرسل اسم الدواء المفقود، وسيقوم الرادار بإرسال تنبيه لكل الصيادلة. بمجرد أن يؤكد صيدلي توفره، سيصلك إشعار بمكانه!</p>
+                </div>
+
+                <input type="text" id="missing-med-input" class="hm-input" placeholder="اكتب اسم الدواء بدقة (مثال: Lovenox 4000)" data-i18n-placeholder="missing_med_ph">
+                <button class="hm-btn" style="background: var(--purple); color: white; box-shadow: 0 0 15px rgba(183, 148, 244, 0.5);" onclick="window.pharmacyEngine.broadcastMed()" data-i18n="btn_launch_med_radar">إطلاق رادار البحث 🚀</button>
+
+                <h3 style="font-size: 15px; color: var(--text-main); margin-top: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;" data-i18n="my_searches_title">عمليات البحث الخاصة بي:</h3>
+                <div id="med-requests-list" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px; padding-bottom: 50px;">
+                    </div>
+            </div>
+
+            <div id="section-night-duty" style="display: none;">
+                <p style="color: var(--text-sub); font-size: 13px; text-align: center; margin-bottom: 15px;" data-i18n="night_duty_desc">العيادات والصيدليات المفتوحة <b>الآن</b> في ولايتك.</p>
+                
+                <div id="night-duty-list" style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 50px;">
+                    </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="chat-slide" class="slide-page">
+    <div class="slide-header">
+        <ion-icon name="arrow-forward-outline" class="back-btn" onclick="closeSPA('chat-slide')"></ion-icon>
+        <h2 style="margin: 0; font-size: 18px;" data-i18n="chat_slide_title">رسائلي والاستشارات 💬</h2>
+    </div>
+
+    <div style="padding: 20px;">
+        <div id="patient-inbox-container">
+             </div>
+    </div>
+</div>
+
+<div id="patient-chat-room" class="slide-page" style="z-index: 10000; background: var(--bg-color);">
+    
+    <div class="slide-header" style="justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <ion-icon name="arrow-forward-outline" class="back-btn" onclick="window.PatientChatSystem.closeChat()"></ion-icon>
+            <img id="p-chat-avatar" src="" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+            <div>
+                <h3 id="p-chat-name" style="margin: 0; font-size: 15px;">د. الطبيب</h3>
+                <small id="p-chat-status" style="color: var(--blue); font-size: 11px;">متصل</small>
+            </div>
+        </div>
+
+        <button id="p-chat-access-btn" onclick="window.PatientChatSystem.toggleMedicalAccess()" style="background: var(--purple); color: white; border: none; padding: 5px 10px; border-radius: 8px; font-size: 11px; display: flex; align-items: center; gap: 5px;">
+            <ion-icon name="lock-closed" id="p-access-icon"></ion-icon> 
+            <span id="p-access-text">مشاركة ملفي</span>
+        </button>
+    </div>
+
+    <div id="p-chat-messages" style="flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #0a0a0a;">
+        </div>
+
+    <div style="padding: 10px; background: #111; display: flex; gap: 10px; align-items: center; border-top: 1px solid #333;">
+        <button onclick="document.getElementById('p-chat-file-upload').click()" style="background: transparent; color: var(--blue); border: none; font-size: 24px;">
+            <ion-icon name="attach-outline"></ion-icon>
+        </button>
+        <input type="file" id="p-chat-file-upload" style="display: none;" onchange="window.PatientChatSystem.uploadMedia(event)">
+        
+        <input type="text" id="p-chat-input" placeholder="اكتب رسالتك للطبيب..." style="flex: 1; background: #222; border: none; padding: 12px; border-radius: 20px; color: white; outline: none;" data-i18n-placeholder="chat_input_ph">
+        
+        <button onclick="window.PatientChatSystem.sendMessage()" style="background: var(--blue); border: none; width: 40px; height: 40px; border-radius: 50%; color: black; display: flex; justify-content: center; align-items: center;">
+            <ion-icon name="send" style="font-size: 18px; margin-right: 2px;"></ion-icon>
+        </button>
+    </div>
+</div>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script src="../js/languages.js"></script>
+<script src="patient_dash.js"></script><script src="map-blad.js"></script>
+<script src="appointments-engine.js"></script>
+    <script src="../capacitor.js"></script>
+    <script src="meds-engine.js"></script><script src="find-docs-engine.js"></script>
+
+<script>// كود زر الرجوع الاحترافي المتوافق مع الموبايل
+document.addEventListener('deviceready', () => {
+    const App = window.Capacitor.Plugins.App;
+
+    App.addListener('backButton', () => {
+        // البحث عن أي صفحة منزلقة مفتوحة (تأكد أن الصفحات المفتوحة تأخذ كلاس active)
+        const activeSlide = document.querySelector('.slide-page.active');
+        
+        // البحث عن المودالات المفتوحة (مثل مودال المنشورات أو الدعم)
+        const activeModal = document.querySelector('.modal[style*="display: flex"]') || 
+                           document.querySelector('.modal[style*="display: block"]');
+
+        if (activeSlide) {
+            // إغلاق الصفحة المنزلقة بدلاً من الخروج من التطبيق
+            if (typeof window.closeSPA === 'function') {
+                window.closeSPA(activeSlide.id);
+            } else {
+                activeSlide.classList.remove('active');
+            }
+        } else if (activeModal) {
+            // إغلاق المودال إذا كان مفتوحاً
+            activeModal.style.display = 'none';
+        } else {
+            // إذا لم يكن هناك شيء مفتوح، يخرج من التطبيق
+            App.exitApp();
+        }
+    });
+});</script>
+</body>
+</html>
