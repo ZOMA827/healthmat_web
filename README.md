@@ -1,6 +1,6 @@
 # 🌐 Healthmate Web: The Healthcare Management Dashboard
 
-[![Live Demo](https://img.shields.io/badge/Demo-Live-blue?style=for-the-badge&logo=google-chrome)](رابط_موقعك_على_firebase_هنا)
+[![Live Demo](https://img.shields.io/badge/Demo-Live-blue?style=for-the-badge&logo=google-chrome)](https://healthmate-web-3d983.web.app)
 [![Build](https://img.shields.io/badge/Built%20with-Firebase%20%7C%20JS%20%7C%20Tailwind-green?style=for-the-badge)](https://github.com/ZOMA827/Healthmate-App)
 
 **Healthmate Web** is the central hub of the Healthmate ecosystem. It provides a lightning-fast, responsive web interface for Patients and Doctors to manage healthcare tasks directly from any browser, powered by a robust cloud infrastructure.
